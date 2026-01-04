@@ -183,9 +183,9 @@ def learn():
         if inp == 'quit':
             break
         if inp == voc['text']:
-            voc['result'] = ','.join(['CORRECT', datetime.datetime.now().isoformat()])
+            voc['result'] = ','.join(['CORRECT', datetime.datetime.now().isoformat(timespec='seconds')])
         else:
-            voc['result'] = ','.join(['INCORRECT', datetime.datetime.now().isoformat()])
+            voc['result'] = ','.join(['INCORRECT', datetime.datetime.now().isoformat(timespec='seconds')])
             correct = False
             inp = ''
             while not correct and inp != 'quit':
