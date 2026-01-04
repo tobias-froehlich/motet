@@ -90,10 +90,16 @@ def edit(remove=False):
             inp = input(f"enter new text:\n{match['text']}\n")
             if inp == 'quit':
                 return
+            if '#' in inp:
+                print('Character # is forbidden.')
+                return
             if inp != '':
                 newText = inp
             inp = input(f"enter new translation:\n{match['translation']}\n")
             if inp == 'quit':
+                return
+            if '#' in inp:
+                print('Character # is forbidden.')
                 return
             if inp != '':
                 newTranslation = inp
@@ -135,9 +141,10 @@ def learn():
             repetitionTime = repetitionTimeInMinutes[-1]
         diff = (now - datetime.datetime.fromisoformat(words[1])).total_seconds() / 60
         return diff > repetitionTime
-    
+ 
     def readVocabulary():
         result = []
+        resultAll = []
         with open(vocabularyFilename, 'r') as f:
             lineIndex = 0
             for line in f:
@@ -149,16 +156,30 @@ def learn():
                             'lineIndex': lineIndex,
                             'text': parts[0],
                             'translation': parts[1],
+                            'exclude': [],
                         })
-        return result
+                    resultAll.append({
+                        'lineIndex': lineIndex,
+                        'text': parts[0],
+                        'translation': parts[1],
+                    })
+        return (result, resultAll)
     
-    vocabulary = readVocabulary()
+    (vocabulary, vocabularyOther) = readVocabulary()
     input(len(vocabulary))
     vocabulary = random.sample(vocabulary, min(unitSize, len(vocabulary)))
-    
+   
+    for voc in vocabulary:
+        for vocOther in vocabularyOther:
+            if voc['translation'] == vocOther['translation'] and voc['lineIndex'] != vocOther['lineIndex']:
+                voc['exclude'].append(vocOther['text'])
+ 
     for voc in vocabulary:
         os.system('clear')
-        inp = input(voc['translation']+'\n')
+        print(voc['translation'])
+        if len(voc['exclude']) > 0:
+            print(f"({', '.join(voc['exclude'])})")
+        inp = input()
         if inp == 'quit':
             break
         if inp == voc['text']:
@@ -166,7 +187,8 @@ def learn():
         else:
             voc['result'] = ','.join(['INCORRECT', datetime.datetime.now().isoformat()])
             correct = False
-            while not correct:
+            inp = ''
+            while not correct and inp != 'quit':
                 inp = input(voc['text']+'\n')
                 if inp == voc['text']:
                     correct = True
